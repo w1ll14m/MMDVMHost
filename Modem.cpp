@@ -272,11 +272,6 @@ void CModem::setPort(IModemPort* port)
 	m_port = port;
 }
 
-bool CModem::get_modemTxState()
-{
-        return m_tx;
-}
-
 void CModem::setRFParams(unsigned int rxFrequency, int rxOffset, unsigned int txFrequency, int txOffset, int txDCOffset, int rxDCOffset, float rfLevel, unsigned int pocsagFrequency)
 {
 	m_rxFrequency     = rxFrequency + rxOffset;
