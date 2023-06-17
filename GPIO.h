@@ -16,46 +16,40 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+/*
+ * GPIO written in 2023 by PD9WP
+ */
+
 #if !defined(GPIO_H)
 #define GPIO_H
 
-//#include "Display.h"
 #include "Timer.h"
 #include "Modem.h"
 
 #include <string>
 #include <vector>
 
-//#include <mcp23017.h>
-//#include <pcf8574.h>
-
-class CModem;
+//class CModem;
 
 class GPIOStat
 {
 public:
         GPIOStat(CModem* modem, bool enabled, unsigned int gpiopin, bool debug);
-//        virtual ~GPIOSTAT();
 
         bool open();
-        void clock(unsigned int ms);
 
+        void clock(unsigned int ms);
         void enable(bool enabled);
         void amplifierPower(bool enabled);
-//        virtual void close();
-
-//protected:
-//        virtual void clearCWInt();
 
 private:
         CModem*         m_modem;
 
         CTimer m_statusTimer;
+        CTimer m_amplifierTimer;
+
         unsigned int m_gpiopin;
         bool m_enabled;
         bool m_debug;
-
-
-
 };
 #endif

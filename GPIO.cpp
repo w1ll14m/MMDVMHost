@@ -32,7 +32,8 @@
 
 GPIOStat::GPIOStat(CModem* modem, bool enabled, unsigned int gpiopin, bool debug) :
 m_modem(modem),
-m_statusTimer(1000U, 0U, 10U),
+m_statusTimer(1000U, 0U, 100U),
+m_amplifierTimer(1000U, 0U, 5000U),
 m_gpiopin(gpiopin),
 m_debug(debug)
 {
@@ -58,6 +59,7 @@ void GPIOStat::enable(bool enabled)
                 m_statusTimer.start();
          } else {
                 m_statusTimer.stop();
+                m_amplifierTimer.stop();
          }
 }
 
@@ -66,11 +68,24 @@ void GPIOStat::clock(unsigned int ms)
 {
         m_statusTimer.clock(ms);
         if (m_statusTimer.hasExpired()) {
-                bool status=m_modem->get_modemTxState();
+                bool status=m_modem->hasTX();
                 if(m_debug)
-                        LogMessage("GPIO clock running %i", status);
-                amplifierPower(status);
+                        LogMessage("GPIO statusTimer expired. Status: %i", status);
+                if(status) {
+                        m_amplifierTimer.start();
+                        amplifierPower(status);
+                }
                 m_statusTimer.start();
+        }
+
+        m_amplifierTimer.clock(ms);
+        if (m_amplifierTimer.hasExpired()) {
+                bool status=m_modem->hasTX();
+                if(m_debug)
+                        LogMessage("GPIO amplifierTimer expired. Status: %i", status);
+                if(!status)
+                        amplifierPower(status);
+                m_amplifierTimer.start();
         }
 }
 
