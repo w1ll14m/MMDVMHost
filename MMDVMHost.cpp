@@ -1946,7 +1946,6 @@ bool CMMDVMHost::initGpio()
 
         LogInfo("GPIO Params");
         LogInfo("    GPIO Pin: %i", gpiopin);
-        LogInfo("    GPIO test: %i", m_modem->get_modemTxState());
 
         m_gpioStat = new GPIOStat(m_modem, gpioenabled, gpiopin, gpiodebug);
 
