@@ -113,7 +113,11 @@ REMOTE_COMMAND CRemoteControl::getCommand()
 				m_command = RCD_ENABLE_FM;
 			else if (m_args.at(1U) == "ax25")
 				m_command = RCD_ENABLE_AX25;
+			else if (m_args.at(1U) == "gpio")
+				m_command = RCD_ENABLE_GPIO;
 			else
+
+
 				replyStr = "KO";
 		} else if (m_args.at(0U) == "disable" && m_args.size() >= DISABLE_ARGS) {
 			if (m_args.at(1U) == "dstar")
@@ -132,6 +136,8 @@ REMOTE_COMMAND CRemoteControl::getCommand()
 				m_command = RCD_DISABLE_FM;
 			else if (m_args.at(1U) == "ax25")
 				m_command = RCD_DISABLE_AX25;
+			else if (m_args.at(1U) == "gpio")
+				m_command = RCD_DISABLE_GPIO;
 			else
 				replyStr = "KO";
 		} else if (m_args.at(0U) == "page" && m_args.size() >= PAGE_ARGS) {

@@ -61,7 +61,8 @@ enum SECTION {
 	SECTION_OLED,
 	SECTION_LCDPROC,
 	SECTION_LOCK_FILE,
-	SECTION_REMOTE_CONTROL
+	SECTION_REMOTE_CONTROL,
+        SECTION_GPIO
 };
 
 CConf::CConf(const std::string& file) :
@@ -339,7 +340,10 @@ m_lockFileEnabled(false),
 m_lockFileName(),
 m_remoteControlEnabled(false),
 m_remoteControlAddress("127.0.0.1"),
-m_remoteControlPort(0U)
+m_remoteControlPort(0U),
+m_gpioEnabled(false),
+m_gpioDebug(false),
+m_gpioPin(0U)
 {
 }
 
@@ -429,6 +433,8 @@ bool CConf::read()
 				section = SECTION_LOCK_FILE;
 			else if (::strncmp(buffer, "[Remote Control]", 16U) == 0)
 				section = SECTION_REMOTE_CONTROL;
+                        else if (::strncmp(buffer, "[GPIO]", 6U) == 0)
+                                section = SECTION_GPIO;
 			else
 				section = SECTION_NONE;
 
@@ -1145,7 +1151,14 @@ bool CConf::read()
 				m_remoteControlEnabled = ::atoi(value) == 1;
 			else if (::strcmp(key, "Port") == 0)
 				m_remoteControlPort = (unsigned short)::atoi(value);
-		}
+		} else if (section == SECTION_GPIO) {
+                        if (::strcmp(key, "Enable") == 0)
+                                m_gpioEnabled = ::atoi(value) == 1;
+                        if (::strcmp(key, "Debug") == 0)
+                                m_gpioDebug = ::atoi(value) == 1;
+                        else if (::strcmp(key, "Pin") == 0)
+                                m_gpioPin = (unsigned int)::atoi(value);
+                }
 	}
 
 	::fclose(fp);
@@ -2521,4 +2534,19 @@ std::string CConf::getRemoteControlAddress() const
 unsigned short CConf::getRemoteControlPort() const
 {
 	return m_remoteControlPort;
+}
+
+bool CConf::getGpioEnabled() const
+{
+        return m_gpioEnabled;
+}
+
+bool CConf::getGpioDebug() const
+{
+        return m_gpioDebug;
+}
+
+unsigned int CConf::getGpioPin() const
+{
+        return m_gpioPin;
 }

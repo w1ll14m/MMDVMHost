@@ -149,6 +149,7 @@ m_pocsagNetwork(NULL),
 m_fmNetwork(NULL),
 m_ax25Network(NULL),
 m_display(NULL),
+m_gpioStat(NULL),
 m_mode(MODE_IDLE),
 m_dstarRFModeHang(10U),
 m_dmrRFModeHang(10U),
@@ -179,6 +180,7 @@ m_m17Enabled(false),
 m_pocsagEnabled(false),
 m_fmEnabled(false),
 m_ax25Enabled(false),
+m_gpioEnabled(false),
 m_cwIdTime(0U),
 m_dmrLookup(NULL),
 m_nxdnLookup(NULL),
@@ -397,6 +399,12 @@ int CMMDVMHost::run()
 		if (!ret)
 			return 1;
 	}
+
+        if (m_gpioEnabled && m_conf.getGpioEnabled()) {
+                ret = initGpio();
+                if (!ret)
+                        return 1;
+        }
 
 	sockaddr_storage transparentAddress;
 	unsigned int transparentAddrLen;
@@ -1210,6 +1218,8 @@ int CMMDVMHost::run()
 			m_pocsag->clock(ms);
 		if (m_fm != NULL)
 			m_fm->clock(ms);
+                if (m_gpioStat != NULL)
+                        m_gpioStat->clock(ms);
 
 		if (m_dstarNetwork != NULL)
 			m_dstarNetwork->clock(ms);
@@ -1928,6 +1938,30 @@ bool CMMDVMHost::createAX25Network()
 	return true;
 }
 
+bool CMMDVMHost::initGpio()
+{
+        bool gpioenabled        = m_conf.getGpioEnabled();
+        unsigned int gpiopin = m_conf.getGpioPin();
+        bool gpiodebug           = m_conf.getGpioDebug();
+
+        LogInfo("GPIO Params");
+        LogInfo("    GPIO Pin: %i", gpiopin);
+        LogInfo("    GPIO test: %i", m_modem->get_modemTxState());
+
+        m_gpioStat = new GPIOStat(m_modem, gpioenabled, gpiopin, gpiodebug);
+
+        bool ret = m_gpioStat->open();
+        if (!ret) {
+                delete m_gpioStat;
+                m_gpioStat = NULL;
+                return false;
+        }
+
+        m_gpioStat->enable(true);
+
+        return true;
+}
+
 void CMMDVMHost::readParams()
 {
 	m_dstarEnabled  = m_conf.getDStarEnabled();
@@ -1939,6 +1973,7 @@ void CMMDVMHost::readParams()
 	m_pocsagEnabled = m_conf.getPOCSAGEnabled();
 	m_fmEnabled     = m_conf.getFMEnabled();
 	m_ax25Enabled   = m_conf.getAX25Enabled();
+        m_gpioEnabled   = m_conf.getGpioEnabled();
 	m_duplex        = m_conf.getDuplex();
 	m_callsign      = m_conf.getCallsign();
 	m_id            = m_conf.getId();
@@ -1958,6 +1993,8 @@ void CMMDVMHost::readParams()
 	LogInfo("    POCSAG: %s", m_pocsagEnabled ? "enabled" : "disabled");
 	LogInfo("    FM: %s", m_fmEnabled ? "enabled" : "disabled");
 	LogInfo("    AX.25: %s", m_ax25Enabled ? "enabled" : "disabled");
+        LogInfo("    GPIO: %s", m_gpioEnabled ? "enabled" : "disabled");
+
 }
 
 void CMMDVMHost::setMode(unsigned char mode)
@@ -2589,6 +2626,10 @@ void CMMDVMHost::remoteControl()
 			if (!m_ax25Enabled)
 				processEnableCommand(m_ax25Enabled, true);
 			break;
+                case RCD_ENABLE_GPIO:
+                        if (!m_gpioEnabled)
+                                processEnableCommand(m_gpioEnabled, true);
+                        break;
 		case RCD_DISABLE_DSTAR:
 			if (m_dstar != NULL && m_dstarEnabled)
 				processEnableCommand(m_dstarEnabled, false);
@@ -2633,6 +2674,10 @@ void CMMDVMHost::remoteControl()
 			if (m_ax25Enabled == true)
 				processEnableCommand(m_ax25Enabled, false);
 			break;
+                case RCD_DISABLE_GPIO:
+                        if (m_gpioEnabled == true)
+                                processEnableCommand(m_gpioEnabled, false);
+                        break;
 		case RCD_PAGE:
 			if (m_pocsag != NULL) {
 				unsigned int ric = m_remoteControl->getArgUInt(0U);

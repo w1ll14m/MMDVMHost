@@ -142,6 +142,8 @@ public:
 	HW_TYPE getHWType() const;
 
 	void clock(unsigned int ms);
+        bool get_modemTxState();
+
 
 	void close();
 

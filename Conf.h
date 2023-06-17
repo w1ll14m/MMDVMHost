@@ -370,6 +370,12 @@ public:
   std::string  getRemoteControlAddress() const;
   unsigned short getRemoteControlPort() const;
 
+  // GPIO Section
+  bool           getGpioEnabled() const;
+  bool           getGpioDebug() const;
+  unsigned int   getGpioPin() const;
+
+
 private:
   std::string  m_file;
   std::string  m_callsign;
@@ -678,6 +684,10 @@ private:
   bool         m_remoteControlEnabled;
   std::string  m_remoteControlAddress;
   unsigned short m_remoteControlPort;
+
+  bool         m_gpioEnabled;
+  bool         m_gpioDebug;
+  unsigned int m_gpioPin;
 };
 
 #endif

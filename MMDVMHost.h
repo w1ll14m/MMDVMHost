@@ -35,6 +35,7 @@
 #include "NXDNLookup.h"
 #include "YSFNetwork.h"
 #include "P25Network.h"
+#include "GPIO.h"
 #include "DMRNetwork.h"
 #include "M17Network.h"
 #include "FMNetwork.h"
@@ -81,6 +82,7 @@ private:
   CFMNetwork*     m_fmNetwork;
   CAX25Network*   m_ax25Network;
   CDisplay*       m_display;
+  GPIOStat*       m_gpioStat;
   unsigned char   m_mode;
   unsigned int    m_dstarRFModeHang;
   unsigned int    m_dmrRFModeHang;
@@ -111,6 +113,7 @@ private:
   bool            m_pocsagEnabled;
   bool            m_fmEnabled;
   bool            m_ax25Enabled;
+  bool            m_gpioEnabled;
   unsigned int    m_cwIdTime;
   CDMRLookup*     m_dmrLookup;
   CNXDNLookup*    m_nxdnLookup;
@@ -133,6 +136,7 @@ private:
   bool createPOCSAGNetwork();
   bool createFMNetwork();
   bool createAX25Network();
+  bool initGpio();
 
   void remoteControl();
   void processModeCommand(unsigned char mode, unsigned int timeout);
