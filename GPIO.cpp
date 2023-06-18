@@ -20,9 +20,7 @@
 #include "Log.h"
 
 #include <wiringPi.h>
-#include <softPwm.h>
-#include <lcd.h>
-#include <pthread.h>
+//#include <pthread.h>
 
 #include <cstdio>
 #include <cassert>
