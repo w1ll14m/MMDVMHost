@@ -32,10 +32,11 @@
 
 GPIOStat::GPIOStat(CModem* modem, bool enabled, unsigned int gpiopin, bool debug) :
 m_modem(modem),
-m_statusTimer(1000U, 0U, 100U),
+m_statusTimer(1000U, 0U, 10U),
 m_amplifierTimer(1000U, 0U, 5000U),
 m_gpiopin(gpiopin),
-m_debug(debug)
+m_debug(debug),
+m_currentStatus(false)
 {
 }
 
@@ -69,32 +70,44 @@ void GPIOStat::clock(unsigned int ms)
         m_statusTimer.clock(ms);
         if (m_statusTimer.hasExpired()) {
                 bool status=m_modem->hasTX();
-                if(m_debug)
-                        LogMessage("GPIO statusTimer expired. Status: %i", status);
                 if(status) {
                         m_amplifierTimer.start();
-                        amplifierPower(status);
+                        if(!getAmplifierPower())
+                                setAmplifierPower(status);
                 }
+                if(m_debug)
+                        LogMessage("GPIO statusTimer expired. Status: %i", status);
                 m_statusTimer.start();
+
         }
 
         m_amplifierTimer.clock(ms);
         if (m_amplifierTimer.hasExpired()) {
                 bool status=m_modem->hasTX();
+                if(!status)
+                        setAmplifierPower(false);
                 if(m_debug)
                         LogMessage("GPIO amplifierTimer expired. Status: %i", status);
-                if(!status)
-                        amplifierPower(status);
                 m_amplifierTimer.start();
         }
 }
 
-void GPIOStat::amplifierPower(bool enabled) {
+bool GPIOStat::getAmplifierPower() {
+        return m_currentStatus;
+}
+
+void GPIOStat::setAmplifierPower(bool enabled) {
         if(m_enabled) {
-                if (enabled) {
-                        digitalWrite (m_gpiopin, HIGH);
-                } else {
-                        digitalWrite (m_gpiopin, LOW);
+                if(m_currentStatus != enabled) {
+                        m_currentStatus=enabled;
+                        if (enabled) {
+                                digitalWrite (m_gpiopin, HIGH);
+                                LogMessage("GPIO Amplifier ON!");
+                        } else {
+                                digitalWrite (m_gpiopin, LOW);
+                                LogMessage("GPIO Amplifier OFF!");
+
+                        }
                 }
 
         }

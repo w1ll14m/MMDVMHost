@@ -40,7 +40,8 @@ public:
 
         void clock(unsigned int ms);
         void enable(bool enabled);
-        void amplifierPower(bool enabled);
+        bool getAmplifierPower();
+        void setAmplifierPower(bool enabled);
 
 private:
         CModem*         m_modem;
@@ -51,5 +52,7 @@ private:
         unsigned int m_gpiopin;
         bool m_enabled;
         bool m_debug;
+        bool m_currentStatus;
+
 };
 #endif
